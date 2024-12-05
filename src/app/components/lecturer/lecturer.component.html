@@ -1,1 +1,61 @@
-<p>lecturer works!</p>
+<div>
+    <button (click)="onGetMessage()">Get Lecturer Message</button>
+
+    <div>
+        <h3>Add Resource</h3>
+        <input type="text" [(ngModel)]="resource.name" placeholder="Resource Name" />
+        <input type="text" [(ngModel)]="resource.description" placeholder="Resource Description" />
+        <button (click)="onAddResource()">Add Resource</button>
+    </div>
+
+    <div>
+        <h3>Get Resources</h3>
+        <button (click)="onGetResources(1)">Get Resources for Course ID 1</button>
+        <ul>
+            <li *ngFor="let res of resources">{{ res.name }} - {{ res.description }}</li>
+        </ul>
+    </div>
+
+    <div>
+        <h3>Add Topic</h3>
+        <input type="text" [(ngModel)]="topic.title" placeholder="Topic Title" />
+        <button (click)="onAddTopic()">Add Topic</button>
+    </div>
+
+    <div>
+        <h3>Get Topics</h3>
+        <button (click)="onGetTopics(1)">Get Topics for Course ID 1</button>
+        <ul>
+            <li *ngFor="let t of topics">{{ t.title }}</li>
+        </ul>
+    </div>
+
+    <div>
+        <h3>Add Lab Assignment</h3>
+        <input type="text" [(ngModel)]="labAssignment.assignmentName" placeholder="Lab Assignment Name" />
+        <button (click)="onAddLabAssignment()">Add Lab Assignment</button>
+    </div>
+
+    <div>
+        <h3>Get Lab Assignments</h3>
+        <button (click)="onGetLabAssignments(1)">Get Lab Assignments for Course ID 1</button>
+        <ul>
+            <li *ngFor="let lab of labAssignments">{{ lab.assignmentName }}</li>
+        </ul>
+    </div>
+
+    <div>
+        <h3>Add Glossary</h3>
+        <input type="text" [(ngModel)]="glossary.term" placeholder="Glossary Term" />
+        <input type="text" [(ngModel)]="glossary.definition" placeholder="Glossary Definition" />
+        <button (click)="onAddGlossary()">Add Glossary</button>
+    </div>
+
+    <div>
+        <h3>Get Glossaries</h3>
+        <button (click)="onGetGlossaries(1)">Get Glossaries for Course ID 1</button>
+        <ul>
+            <li *ngFor="let g of glossaries">{{ g.term }} - {{ g.definition }}</li>
+        </ul>
+    </div>
+</div>
