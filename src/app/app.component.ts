@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LoginComponent } from "./components/login/login.component";
 import { HttpClientModule } from '@angular/common/http';
+import { LecturerComponent } from "./components/lecturer/lecturer.component";
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -12,5 +13,3 @@ import { HttpClientModule } from '@angular/common/http';
 export class AppComponent {
   title = 'Lab5';
 }
-
-
