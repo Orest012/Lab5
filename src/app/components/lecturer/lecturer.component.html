@@ -1,4 +1,4 @@
-<div>
+<!-- <div>
     <button (click)="onGetMessage()">Get Lecturer Message</button>
 
     <div>
@@ -58,4 +58,86 @@
             <li *ngFor="let g of glossaries">{{ g.term }} - {{ g.definition }}</li>
         </ul>
     </div>
+</div> -->
+
+
+<div>
+    <!-- Кнопка для відкриття форми -->
+    <button (click)="toggleAddResourceForm()">Додати ресурс</button>
+
+    <!-- Панель для введення даних -->
+    <div *ngIf="isFormVisible">
+        <h3>Додати ресурс</h3>
+        <input [(ngModel)]="resource.name" placeholder="Назва ресурсу" />
+        <input [(ngModel)]="resource.description" placeholder="Опис ресурсу" />
+        <input [(ngModel)]="resource.link" placeholder="Посилання на ресурс" />
+        <input [(ngModel)]="resource.topic" placeholder="Тема ресурсу" />
+        <button (click)="addResource()">Додати</button>
+    </div>
+
+    <!-- Список доданих ресурсів -->
+    <div *ngIf="resources.length > 0">
+        <h3>Додані ресурси:</h3>
+        <div *ngFor="let group of resources">
+            <h4>{{ group.topic }}</h4>
+            <ul>
+                <li *ngFor="let res of group.resources">
+                    {{ res.title }} - <a href="{{ res.link }}" target="_blank">Посилання</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div>
+        <!-- Форма для завантаження файлів -->
+        <h3>Завантажити файл</h3>
+        <input type="file" (change)="onFileSelect($event)" />
+        <button *ngIf="selectedFile" (click)="uploadFile()">Завантажити файл</button>
+
+        <p *ngIf="selectedFile">Вибрано файл: {{ selectedFile.name }}</p>
+    </div>
+
+    <!-- Виведення завантажених файлів -->
+    <div *ngIf="files.length > 0">
+        <h3>Завантажені файли:</h3>
+        <ul>
+            <li *ngFor="let file of files">
+                {{ file.fileName }} -
+                <a (click)="downloadFile(file.fileName)">Завантажити</a>
+            </li>
+        </ul>
+    </div>
+
+
+
+
+    <div>
+        <h2>Lab Assignments</h2>
+        <form (ngSubmit)="addLabAssignment()">
+            <label>Title:</label>
+            <input [(ngModel)]="labAssignment.title" name="labTitle" required />
+            <label>Description:</label>
+            <input [(ngModel)]="labAssignment.description" name="labDescription" required />
+            <label>Deadline:</label>
+            <input [(ngModel)]="labAssignment.deadline" name="labDeadline" type="date" required />
+            <button type="submit">Add Lab Assignment</button>
+        </form>
+        <!-- <ul>
+            <li *ngFor="let lab of labAssignments">
+                {{ lab.title }}: {{ lab.description }} (Deadline: {{ lab.deadline }})
+            </li>
+        </ul> -->
+    </div>
+
+    <div>
+        <h3>Список завдань:</h3>
+        <ul>
+            <li *ngFor="let assignment of assignments">
+                Назва: {{ assignment.title }} <br />
+                Опис: {{ assignment.description }} <br />
+                Дедлайн: {{ assignment.deadlines | date: 'short' }}
+            </li>
+        </ul>
+    </div>
+
 </div>

@@ -6,7 +6,7 @@ import { Topic } from '../../models/Topic';
 import { LabAssignment } from '../../models/LabAssignment';
 import { Glossary } from '../../models/Glossary';
 import { CommonModule } from '@angular/common';
-
+import { OnInit } from '@angular/core';
 @Component({
   selector: 'app-lecturer',
   templateUrl: './lecturer.component.html',
@@ -14,99 +14,226 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-export class LecturerComponent {
-  // Моделі для даних
-  resource: Resource = { name: '', description: '' };
-  topic: Topic = { title: '', courseId: 1 };
-  labAssignment: LabAssignment = { assignmentName: '', courseId: 1 };
-  glossary: Glossary = { term: '', definition: '' };
+export class LecturerComponent implements OnInit {
+  resources: any[] = [];
+  isFormVisible = false;
+  resource = {
+    name: '',
+    description: '',
+    link: '',
+    topic: ''
+  };
 
-  // Для зберігання отриманих даних
-  resources: Resource[] = [];
-  topics: Topic[] = [];
-  labAssignments: LabAssignment[] = [];
-  glossaries: Glossary[] = [];
+  // Forms data
+  glossary = {
+    name: '',
+    description: ''
+  };
 
+  labAssignment = {
+    title: '',
+    description: '',
+    deadline: ''
+  };
+
+  glossaries: any[] = [];
+  labAssignments: any[] = [];
+  assignments: any[] = [];
+  courseId: number = 1;
   constructor(private http: HttpClient) { }
 
-  // Отримати повідомлення
-  onGetMessage() {
-    this.http.get('https://localhost:7195/api/lecturer', { responseType: 'text' })
-      .subscribe(response => {
-        console.log(response);
+  ngOnInit(): void {
+    this.getResources();
+    this.getFiles();
+    this.getAllAssignments();
+  }
+
+  // Метод для отримання всіх ресурсів
+  getResources(): void {
+    this.http.get<any[]>('https://localhost:7195/api/lecturer/GetAllResources').subscribe(
+      (data) => {
+        this.resources = data;
+        this.groupResourcesByTopic();
+      },
+      (error) => {
+        console.error('Error fetching resources:', error);
+      }
+    );
+  }
+
+  // Метод для групування ресурсів за темами
+  groupResourcesByTopic(): void {
+    const grouped = this.resources.reduce((acc, resource) => {
+      const topic = resource.topic || 'Без теми';
+      if (!acc[topic]) {
+        acc[topic] = [];
+      }
+      acc[topic].push(resource);
+      return acc;
+    }, {});
+
+    this.resources = Object.entries(grouped).map(([topic, resources]) => ({
+      topic,
+      resources
+    }));
+  }
+
+  // Метод для додавання ресурсу
+  addResource(): void {
+    const newResource = {
+      title: this.resource.name,
+      link: this.resource.link,
+      topic: this.resource.topic || 'Без теми',
+      courseId: 1
+    };
+
+    this.http.post('https://localhost:7195/api/lecturer/AddResource', newResource).subscribe(
+      () => {
+        this.getResources();
+        this.isFormVisible = false;
+        this.resource = { name: '', description: '', link: '', topic: '' };
+      },
+      (error) => {
+        console.error('Error adding resource:', error);
+        console.log('Error details:', error.error);
+      }
+    );
+  }
+
+
+  toggleAddResourceForm(): void {
+    this.isFormVisible = !this.isFormVisible;
+  }
+
+  selectedFile: File | null = null;
+  files: any[] = [];
+
+
+  // Метод для обробки вибору файлу
+  onFileSelect(event: any): void {
+    this.selectedFile = event.target.files[0];
+  }
+
+  // Метод для завантаження файлу на сервер
+  uploadFile(): void {
+    if (this.selectedFile) {
+      const formData = new FormData();
+      formData.append('file', this.selectedFile);
+
+      this.http.post('https://localhost:7195/api/lecturer/UploadFile', formData)
+        .subscribe(response => {
+          // Оновлюємо список файлів після завантаження
+          this.getFiles();
+          this.selectedFile = null; // Скидаємо вибраний файл
+        }, error => {
+          console.error('Error uploading file:', error);
+        });
+    }
+  }
+
+  downloadFile(fileName: string): void {
+    const encodedFileName = encodeURIComponent(fileName);
+    const url = `https://localhost:7195/api/lecturer/DownloadFile/${encodedFileName}`;
+
+    this.http.get(url, { responseType: 'blob' }).subscribe(blob => {
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    }, error => {
+      console.error('Error downloading file:', error);
+    });
+  }
+
+
+
+  // Метод для отримання списку файлів
+  getFiles(): void {
+    this.http.get<any[]>('https://localhost:7195/api/lecturer/GetAllFiles')
+      .subscribe(data => {
+        this.files = data;
+      }, error => {
+        console.error('Error fetching files:', error);
       });
   }
 
-  // Додати ресурс
-  onAddResource() {
-    this.http.post('https://localhost:7195/api/lecturer/AddResource', this.resource)
-      .subscribe(
-        response => {
-          console.log('Resource added:', response);
-        },
-        error => {
-          console.error('Error adding resource:', error);
-          if (error.error && error.error.errors) {
-            console.error('Validation errors:', error.error.errors);
-          }
-        }
-      );
-  }
+  // Add Glossary
+  addGlossary(): void {
+    const glossaryData = {
+      CourseId: this.courseId, // Course ID
+      Term: this.glossary.name, // Назва терміну
+      Definition: this.glossary.description // Опис терміну
+    };
 
-
-  // Отримати ресурси
-  onGetResources(courseId: number) {
-    this.http.get<Resource[]>(`https://localhost:7195/api/lecturer/GetResources/${courseId}`)
-      .subscribe((response: Resource[]) => {
-        this.resources = response;
-      });
-  }
-
-  // Додати тему
-  onAddTopic() {
-    this.http.post('https://localhost:7195/api/lecturer/AddTopic', this.topic)
-      .subscribe(response => {
-        console.log('Topic added:', response);
-      });
-  }
-
-  // Отримати теми
-  onGetTopics(courseId: number) {
-    this.http.get<Topic[]>(`https://localhost:7195/api/lecturer/GetTopics/${courseId}`)
-      .subscribe((response: Topic[]) => {
-        this.topics = response;
-      });
-  }
-
-  // Додати лабораторне завдання
-  onAddLabAssignment() {
-    this.http.post('https://localhost:7195/api/lecturer/AddLabAssignment', this.labAssignment)
-      .subscribe(response => {
-        console.log('Lab Assignment added:', response);
-      });
-  }
-
-  // Отримати лабораторні завдання
-  onGetLabAssignments(courseId: number) {
-    this.http.get<LabAssignment[]>(`https://localhost:7195/api/lecturer/GetLabAssignments/${courseId}`)
-      .subscribe((response: LabAssignment[]) => {
-        this.labAssignments = response;
-      });
-  }
-
-  // Додати глосарій
-  onAddGlossary() {
-    this.http.post('https://localhost:7195/api/lecturer/AddGlossary', this.glossary)
-      .subscribe(response => {
+    this.http.post('https://localhost:7195/api/lecturer/AddGlossary', glossaryData).subscribe(
+      (response) => {
         console.log('Glossary added:', response);
-      });
+        this.getGlossaries();
+        this.glossary = { name: '', description: '' };
+      },
+      (error) => {
+        console.error('Error adding glossary:', error);
+      }
+    );
   }
 
-  // Отримати глосарії
-  onGetGlossaries(courseId: number) {
-    this.http.get<Glossary[]>(`https://localhost:7195/api/lecturer/GetGlossaries/${courseId}`)
-      .subscribe((response: Glossary[]) => {
-        this.glossaries = response;
-      });
+  // Метод для отримання всіх завдань
+  getAllAssignments(): void {
+    this.http.get<any[]>('https://localhost:7195/api/lecturer/GetAllAssignment').subscribe(
+      (data) => {
+        this.assignments = data; // Збереження отриманих даних
+      },
+      (error) => {
+        console.error('Error fetching assignments:', error);
+      }
+    );
   }
+
+  // Get Glossaries
+  getGlossaries(): void {
+    this.http.get<any[]>(`https://localhost:7195/api/lecturer/GetGlossaries/${this.courseId}`).subscribe(
+      (data) => {
+        this.glossaries = data;
+      },
+      (error) => {
+        console.error('Error fetching glossaries:', error);
+      }
+    );
+  }
+
+  // Add Lab Assignment
+  addLabAssignment(): void {
+    this.http.post('https://localhost:7195/api/lecturer/AddLabAssignment', {
+      title: this.labAssignment.title,
+      description: this.labAssignment.description,
+      deadline: this.labAssignment.deadline,
+      courseId: this.courseId
+    }).subscribe(
+      (response) => {
+        console.log('Lab assignment added:', response);
+        this.getLabAssignments();
+        this.labAssignment = { title: '', description: '', deadline: '' };
+      },
+      (error) => {
+        console.error('Error adding lab assignment:', error);
+      }
+    );
+  }
+
+  // Get Lab Assignments
+  getLabAssignments(): void {
+    this.http.get<any[]>(`https://localhost:7195/api/lecturer/GetLabAssignments/${this.courseId}`).subscribe(
+      (data) => {
+        this.labAssignments = data;
+      },
+      (error) => {
+        console.error('Error fetching lab assignments:', error);
+      }
+    );
+  }
+
+
+
 }
