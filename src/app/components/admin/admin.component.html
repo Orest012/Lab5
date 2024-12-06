@@ -1,0 +1,20 @@
+<div class="admin-container">
+    <h2>Admin Panel</h2>
+
+    <div class="action-container">
+        <h3>Add Role</h3>
+        <input [(ngModel)]="newRole" placeholder="Enter role name" />
+        <button (click)="addRole()">Add Role</button>
+    </div>
+
+    <div class="action-container">
+        <h3>Assign Role</h3>
+        <input [(ngModel)]="username" placeholder="Enter username" />
+        <input [(ngModel)]="roleToAssign" placeholder="Enter role name" />
+        <button (click)="assignRole()">Assign Role</button>
+    </div>
+
+    <div *ngIf="message" class="message">
+        {{ message }}
+    </div>
+</div>

@@ -24,34 +24,4 @@ export class LecturerService {
   getResources(courseId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/GetResources/${courseId}`);
   }
-
-  // Додати тему
-  addTopic(topic: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddTopic`, topic);
-  }
-
-  // Отримати теми
-  getTopics(courseId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/GetTopics/${courseId}`);
-  }
-
-  // Додати лабораторну роботу
-  addLabAssignment(labAssignment: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddLabAssignment`, labAssignment);
-  }
-
-  // Отримати лабораторні роботи
-  getLabAssignments(courseId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/GetLabAssignments/${courseId}`);
-  }
-
-  // Додати глосарій
-  addGlossary(glossary: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/AddGlossary`, glossary);
-  }
-
-  // Отримати глосарії
-  getGlossaries(courseId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/GetGlossaries/${courseId}`);
-  }
 }
